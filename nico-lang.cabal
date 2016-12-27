@@ -18,3 +18,11 @@ executable nico-lang
   main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
+                     , attoparsec
+
+executable niconvert
+  hs-source-dirs:      .
+  main-is:             NiConverter.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
