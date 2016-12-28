@@ -6,13 +6,13 @@ module NicoLang.Parser
 import Control.Applicative
 import Data.Attoparsec.Text (Parser)
 import Data.Text (Text)
-import NicoLang.Parser.Types
+import NicoLang.Parser.Items
 import qualified Data.Attoparsec.Text as P
 import qualified Data.Text as T
 
 
 -- | Parse nico-lang source code
-parse :: NicoLangSourceCode -> NicoLangProgramAbstract
+parse :: NicoLangSourceCode -> NicoLangSyntaxAbstract
 parse = undefined
 
 parseInput :: Parser a -> Text -> Either String a
