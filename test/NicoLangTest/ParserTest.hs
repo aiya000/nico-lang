@@ -6,7 +6,8 @@ import NicoLang.Parser
 import NicoLang.Parser.Items
 import Test.Tasty
 import Test.Tasty.HUnit
-
+import Test.Tasty.QuickCheck
+import qualified NicoLang.Parser as NicoParser
 
 simplySourceCode :: NicoLangSourceCode
 simplySourceCode = "笑顔届ける矢澤にこにこ！にっこにっこにーにっこにっこにーにこにーって覚えてラブニコ！にこにーって覚えてラブニコ！だめだめだめっ！あなたのハートににこにこにー！ぴょんぴょんぴょんっ！"
@@ -21,7 +22,7 @@ sourceCode = "笑顔届ける矢澤にこにこ！にっこにっこにーにっ
 test :: [TestTree]
 test =
   [ testProperty "Parse from source code text to nico-lang abstract" $
-      NicoP.parse simplySourceCode @?= simplySourceCodeAbstract
+      NicoParser.parse simplySourceCode @?= simplySourceCodeAbstract
   , testProperty "show . parse = id" $
-      (show . NicoP.parse $ sourceCode) @?= sourceCode
+      (show . NicoParser.parse $ sourceCode) @?= sourceCode
   ]
