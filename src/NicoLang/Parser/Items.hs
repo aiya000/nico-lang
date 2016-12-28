@@ -4,6 +4,7 @@
 module NicoLang.Parser.Items where
 
 import Data.Text (Text)
+import NicoLang.Types (ShowT, showT)
 import qualified Data.Text as T
 
 --TODO: Rename NicoAdd to NicoIncr
@@ -12,16 +13,27 @@ import qualified Data.Text as T
 data NicoOperation = NicoForward | NicoBackword | NicoAdd | NicoSub | NicoOutput | NicoInput | NicoLoopBegin | NicoLoopEnd
   deriving (Eq)
 
--- | NicoOperation can be restored to the source code by (Text.pack . show)
+-- | Convert to the brainf*ck code for the debug
 instance Show NicoOperation where
-  show NicoForward   = T.unpack nicoForwardText
-  show NicoBackword  = T.unpack nicoBackwordText
-  show NicoAdd       = T.unpack nicoAddText
-  show NicoSub       = T.unpack nicoSubText
-  show NicoOutput    = T.unpack nicoOutputText
-  show NicoInput     = T.unpack nicoInputText
-  show NicoLoopBegin = T.unpack nicoLoopBeginText
-  show NicoLoopEnd   = T.unpack nicoLoopEndText
+  show NicoForward   = ">"
+  show NicoBackword  = "<"
+  show NicoAdd       = "+"
+  show NicoSub       = "-"
+  show NicoOutput    = "."
+  show NicoInput     = ","
+  show NicoLoopBegin = "["
+  show NicoLoopEnd   = "]"
+
+-- | NicoOperation can be restored to the source code by show T
+instance ShowT NicoOperation where
+  showT NicoForward   = nicoForwardText
+  showT NicoBackword  = nicoBackwordText
+  showT NicoAdd       = nicoAddText
+  showT NicoSub       = nicoSubText
+  showT NicoOutput    = nicoOutputText
+  showT NicoInput     = nicoInputText
+  showT NicoLoopBegin = nicoLoopBeginText
+  showT NicoLoopEnd   = nicoLoopEndText
 
 -- | The whole of nico-lang source code abstract
 type NicoLangSyntaxAbstract = [NicoOperation]
