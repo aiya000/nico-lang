@@ -7,18 +7,16 @@ import Data.Text (Text)
 import NicoLang.Types (ShowT, showT)
 import qualified Data.Text as T
 
---TODO: Rename NicoAdd to NicoIncr
---TODO: Rename NicoSub to NicoDecr
 -- | Same as brainf*ck's ><+-.,[]
-data NicoOperation = NicoForward | NicoBackword | NicoAdd | NicoSub | NicoOutput | NicoInput | NicoLoopBegin | NicoLoopEnd
+data NicoOperation = NicoForward | NicoBackword | NicoIncr | NicoDecr | NicoOutput | NicoInput | NicoLoopBegin | NicoLoopEnd
   deriving (Eq)
 
 -- | Convert to the brainf*ck code for the debug
 instance Show NicoOperation where
   show NicoForward   = ">"
   show NicoBackword  = "<"
-  show NicoAdd       = "+"
-  show NicoSub       = "-"
+  show NicoIncr      = "+"
+  show NicoDecr      = "-"
   show NicoOutput    = "."
   show NicoInput     = ","
   show NicoLoopBegin = "["
@@ -28,8 +26,8 @@ instance Show NicoOperation where
 instance ShowT NicoOperation where
   showT NicoForward   = nicoForwardText
   showT NicoBackword  = nicoBackwordText
-  showT NicoAdd       = nicoAddText
-  showT NicoSub       = nicoSubText
+  showT NicoIncr      = nicoIncrText
+  showT NicoDecr      = nicoDecrText
   showT NicoOutput    = nicoOutputText
   showT NicoInput     = nicoInputText
   showT NicoLoopBegin = nicoLoopBeginText
@@ -49,11 +47,11 @@ nicoForwardText = "笑顔届ける矢澤にこにこ！"
 nicoBackwordText :: Text
 nicoBackwordText = "だめだめだめっ！"
 
-nicoAddText :: Text
-nicoAddText = "にっこにっこにー"
+nicoIncrText :: Text
+nicoIncrText = "にっこにっこにー"
 
-nicoSubText :: Text
-nicoSubText = "にこにーって覚えてラブニコ！"
+nicoDecrText :: Text
+nicoDecrText = "にこにーって覚えてラブニコ！"
 
 nicoOutputText :: Text
 nicoOutputText = "ぴょんぴょんぴょんっ！"
