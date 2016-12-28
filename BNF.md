@@ -8,20 +8,19 @@ nico-lang respects brain f\*ck
 <code>       ::= <empty-code> | <operation> | <operation> <code>
 <empty-code> ::= ""
 
-<operation> ::= <forward> | <backword> | <add> | <sub> | <output> | <input>
+<operation> ::= <forward> | <backword> | <increment> | <decrement> | <output> | <input>
               | <loop>
 
 <loop> ::= <loop-begin> <code> <loop-end>
 
 <forward>    ::= "笑顔届ける矢澤にこにこ！"
 <backword>   ::= "だめだめだめっ！"
-<add>        ::= "にっこにっこにー"
-<sub>        ::= "にこにーって覚えてラブニコ！"
+<increment>  ::= "にっこにっこにー"
+<decrement>  ::= "にこにーって覚えてラブニコ！"
 <output>     ::= "ぴょんぴょんぴょんっ！"
 <input>      ::= "あなたのハートににこにこにー！"
 <loop-begin> ::= "にこにーはみんなのもの！"
 <loop-end>   ::= "ｷﾓﾁﾜﾙｲ"
-
 ```
 
 ## The code mapping (from brainf\*ck to nico)
