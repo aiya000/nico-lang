@@ -21,11 +21,13 @@ executable nico-lang
   build-depends:       base >= 4.7 && < 5
                      , nico-lang
                      , text
+                     , attoparsec
 
 library
   hs-source-dirs:      src
   build-depends:       base >= 4.7 && < 5
                      , attoparsec
+                     , containers
                      , text
   default-language:    Haskell2010
   exposed-modules:     NicoLang.Parser

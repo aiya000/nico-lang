@@ -3,8 +3,10 @@
 -- | Define nico-lang's abstract syntax tree
 module NicoLang.Parser.Items where
 
+import Data.Map (Map)
 import Data.Text (Text)
 import NicoLang.Types (ShowT, showT)
+import qualified Data.Map.Lazy as M
 import qualified Data.Text as T
 
 -- | Same as brainf*ck's ><+-.,[]
@@ -34,11 +36,23 @@ instance ShowT NicoOperation where
   showT NicoLoopEnd   = nicoLoopEndText
 
 -- | The whole of nico-lang source code abstract
-type NicoLangSyntaxAbstract = [NicoOperation]
+type NicoLangAbstractSyntaxList = [NicoOperation]
 
 -- | nico-lang's source code is Text
 type NicoLangSourceCode = Text
 
+
+-- Mapping from one operation text to one NicoOperation
+operationMap :: Map Text NicoOperation
+operationMap = M.fromList [ (nicoForwardText   , NicoForward)
+                          , (nicoBackwordText  , NicoBackword)
+                          , (nicoIncrText      , NicoIncr)
+                          , (nicoDecrText      , NicoDecr)
+                          , (nicoOutputText    , NicoOutput)
+                          , (nicoInputText     , NicoInput)
+                          , (nicoLoopBeginText , NicoLoopBegin)
+                          , (nicoLoopEndText   , NicoLoopEnd)
+                          ]
 
 -- | This text means the forward of nico-lang syntax
 nicoForwardText :: Text

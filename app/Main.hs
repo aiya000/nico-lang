@@ -3,6 +3,10 @@ module Main where
 
 import System.Environment (getArgs)
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
+
+import NicoLang.Parser.Items
+import qualified Data.Attoparsec.Text as P
 import qualified NicoLang.Parser as NicoParser
 
 
@@ -14,4 +18,6 @@ main = do
   nicoCode <- T.pack <$> readFile nicoFile
   let nicoAbstract = NicoParser.parse nicoCode
   --TODO: Do evaluate
-  print nicoAbstract
+  case nicoAbstract of
+    Left e  -> putStrLn $ "Caught the error: " ++ e
+    Right a -> print a
