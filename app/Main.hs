@@ -1,12 +1,13 @@
 -- | The entry point of the program
 module Main where
 
+import Control.Monad (void)
+import Control.Monad.Trans.State.Lazy (execStateT)
 import System.Environment (getArgs)
+import qualified Data.IntMap.Lazy as M
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-
-import NicoLang.Parser.Items
-import qualified Data.Attoparsec.Text as P
+import qualified NicoLang.Evaluator as NicoEval
 import qualified NicoLang.Parser as NicoParser
 
 
@@ -17,7 +18,7 @@ main = do
   nicoFile <- head <$> getArgs
   nicoCode <- T.pack <$> readFile nicoFile
   let nicoAbstract = NicoParser.parse nicoCode
-  --TODO: Do evaluate
   case nicoAbstract of
-    Left e  -> putStrLn $ "Caught the error: " ++ e
-    Right a -> print a
+    Left  e -> putStrLn $ "Caught the error: " ++ e
+    Right a -> let initialState = (M.empty, 0)
+               in void $ flip execStateT initialState $ NicoEval.eval a
