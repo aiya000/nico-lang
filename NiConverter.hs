@@ -4,6 +4,7 @@
 module Main where
 
 import Data.Text (Text)
+import System.Environment (getArgs)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
@@ -13,7 +14,8 @@ import qualified Data.Text.IO as T
 -- its code means same as its brainf*ck code.
 main :: IO ()
 main = do
-  bfCode <- T.pack <$> readFile "./hello.bf"
+  targetFile <- head <$> getArgs
+  bfCode     <- T.pack <$> readFile targetFile
   let nicoCode = T.concatMap niconvert bfCode
   T.putStrLn nicoCode
 
