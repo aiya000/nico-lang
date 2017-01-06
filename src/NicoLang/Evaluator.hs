@@ -3,6 +3,7 @@ module NicoLang.Evaluator
   ( NicoMemory
   , NicoPointer
   , NicoMachine
+  , emptyMachine
   , eval
   ) where
 
@@ -19,6 +20,11 @@ type NicoPointer = Int
 
 -- | The virtual machine's state
 type NicoMachine = (NicoMemory, NicoPointer)
+
+
+-- | The initial state of NicoMachine
+emptyMachine :: NicoMachine
+emptyMachine = (M.empty, 0)
 
 
 -- | Evaluate and execute NicoLangAbstractSyntaxList with the virtual machine state
