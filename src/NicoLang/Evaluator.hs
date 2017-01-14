@@ -13,13 +13,15 @@ import Data.Stack (Stack, push, pop, runStack, stack)
 import NicoLang.Parser.Items
 import qualified Data.IntMap.Lazy as M
 
--- | The virtual machine's memory
+-- |
+-- The virtual machine's memory,
+-- The pairs of the memory address and the value.
 type NicoMemory = IntMap Int
 
--- | The state of the current pointer
+-- | The state of the virtual machine cell's current pointer
 type NicoPointer = Int
 
--- | The virtual machine's state
+-- | The virtual machine (The running program's state)
 data NicoMachine = NicoMachine
   { nicoMemory            :: NicoMemory  -- ^ The state of the NicoProgram result
   , nicoPointer           :: NicoPointer  -- ^ The NicoProgram's current cell
