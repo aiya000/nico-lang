@@ -44,12 +44,8 @@ eval [] = do
   return mem
 
 eval (NicoForward:rest) = do
-  (NicoMachine mem np st) <- get
-  case M.lookup np mem of
-    Nothing  -> let newMem = M.insert np 1 mem  -- 1 is `0 (initial state) + 1 (forward)`
-                in put $ NicoMachine newMem np st
-    Just val -> let newMem = M.insert np (val + 1) mem  -- Replace val to `val + 1` on mem
-                in put $ NicoMachine newMem np st
+  machine@(NicoMachine mem np _) <- get
+  put machine { nicoPointer = np + 1 }
   return mem
 
 eval (NicoBackword:rest)  = undefined
