@@ -7,7 +7,9 @@ module NicoLang.Evaluator
   , eval
   ) where
 
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.State.Lazy (StateT, get, put)
+import Data.Char (chr, ord)
 import Data.IntMap.Lazy (IntMap)
 import Data.Stack (Stack, push, pop, runStack, stack)
 import NicoLang.Parser.Items
@@ -48,10 +50,42 @@ eval (NicoForward:rest) = do
   put machine { nicoPointer = np + 1 }
   return mem
 
-eval (NicoBackword:rest)  = undefined
-eval (NicoIncr:rest)      = undefined
-eval (NicoDecr:rest)      = undefined
-eval (NicoOutput:rest)    = undefined
-eval (NicoInput:rest)     = undefined
+eval (NicoBackword:rest) = do
+  machine@(NicoMachine mem np _) <- get
+  put machine { nicoPointer = np - 1 }
+  return mem
+
+eval (NicoIncr:rest) = do
+  (NicoMachine mem np st) <- get
+  case M.lookup np mem of
+    Nothing  -> let newMem = M.insert np 1 mem  -- 1 is `0 (initial state) + 1 (forward)`
+                in put $ NicoMachine newMem np st
+    Just val -> let newMem = M.insert np (val + 1) mem  -- Replace val to `val + 1` on mem
+                in put $ NicoMachine newMem np st
+  return mem
+
+eval (NicoDecr:rest) = do
+  (NicoMachine mem np st) <- get
+  case M.lookup np mem of
+    Nothing  -> let newMem = M.insert np (-1) mem  -- 1 is `0 (initial state) - 1 (backward)`
+                in put $ NicoMachine newMem np st
+    Just val -> let newMem = M.insert np (val - 1) mem  -- Replace val to `val - 1` on mem
+                in put $ NicoMachine newMem np st
+  return mem
+
+eval (NicoOutput:rest) = do
+  (NicoMachine mem np st) <- get
+  case M.lookup np mem of
+    Nothing  -> liftIO $ putChar $ chr 0
+    Just val -> liftIO $ putChar $ chr val
+  return mem
+
+eval (NicoInput:rest) = do
+  machine@(NicoMachine mem np st) <- get
+  val <- liftIO . fmap ord $ getChar
+  let newMem = M.insert np val mem
+  put machine { nicoMemory = newMem }
+  return newMem
+
 eval (NicoLoopBegin:rest) = undefined
 eval (NicoLoopEnd:rest)   = undefined
