@@ -9,8 +9,15 @@ import NicoLang.Types (ShowT, showT)
 import qualified Data.Map.Lazy as M
 import qualified Data.Text as T
 
--- | Same as brainf*ck's ><+-.,[]
-data NicoOperation = NicoForward | NicoBackword | NicoIncr | NicoDecr | NicoOutput | NicoInput | NicoLoopBegin | NicoLoopEnd
+-- | The nico-lang's expression of the brainf*ck's ><+-.,[]
+data NicoOperation = NicoForward    -- ^ >
+                   | NicoBackword   -- ^ <
+                   | NicoIncr       -- ^ +
+                   | NicoDecr       -- ^ -
+                   | NicoOutput     -- ^ .
+                   | NicoInput      -- ^ ,
+                   | NicoLoopBegin  -- ^ [
+                   | NicoLoopEnd    -- ^ ]
   deriving (Eq)
 
 -- | Convert to the brainf*ck code for the debug
@@ -24,7 +31,7 @@ instance Show NicoOperation where
   show NicoLoopBegin = "["
   show NicoLoopEnd   = "]"
 
--- | NicoOperation can be restored to the source code by show T
+-- | NicoOperation can be restored to the source code by showT
 instance ShowT NicoOperation where
   showT NicoForward   = nicoForwardText
   showT NicoBackword  = nicoBackwordText
@@ -35,14 +42,14 @@ instance ShowT NicoOperation where
   showT NicoLoopBegin = nicoLoopBeginText
   showT NicoLoopEnd   = nicoLoopEndText
 
--- | The whole of nico-lang source code abstract
+-- | The whole of the nico-lang source code abstract
 type NicoLangAbstractSyntaxList = [NicoOperation]
 
--- | nico-lang's source code is Text
+-- | The nico-lang's source code is Text
 type NicoLangSourceCode = Text
 
 
--- Mapping from one operation text to one NicoOperation
+-- The mapping from an operation text to a NicoOperation
 operationMap :: Map Text NicoOperation
 operationMap = M.fromList [ (nicoForwardText   , NicoForward)
                           , (nicoBackwordText  , NicoBackword)
