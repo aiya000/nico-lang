@@ -1,17 +1,18 @@
 -- | For executing nico-lang abstract syntax list
 module NicoLang.Evaluator
   ( NicoMemory
-  , NicoPointer
-  , NicoMachine
+  , NicoMemoryPointer
+  , nicoProgramPointer
+  , NicoMachine (NicoMachine)
   , emptyMachine
   , eval
   ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.State.Lazy (StateT, get, put)
+import Control.Monad.Trans.State.Lazy (StateT, get, put, evalStateT, gets)
 import Data.Char (chr, ord)
 import Data.IntMap.Lazy (IntMap)
-import Data.Stack (Stack, push, pop, runStack, stack)
+import Data.Maybe (isNothing)
 import NicoLang.Parser.Items
 import qualified Data.IntMap.Lazy as M
 
@@ -21,71 +22,161 @@ import qualified Data.IntMap.Lazy as M
 type NicoMemory = IntMap Int
 
 -- | The state of the virtual machine cell's current pointer
-type NicoPointer = Int
+type NicoMemoryPointer = Int
+
+-- | The ongoing program's position
+type NicoProgramPointer = Int
 
 -- | The virtual machine (The running program's state)
 data NicoMachine = NicoMachine
-  { nicoMemory            :: NicoMemory  -- ^ The state of the NicoProgram result
-  , nicoPointer           :: NicoPointer  -- ^ The NicoProgram's current cell
-  , nicoLoopBeginPointers :: Stack NicoPointer NicoPointer  -- ^ The NicoPointer is pushed to here when The NicoLoopBegin was evaluated
+  { nicoMemory         :: NicoMemory  -- ^ The state of the NicoProgram result
+  , nicoMemoryPointer  :: NicoMemoryPointer  -- ^ The running machine's memory pointer
+  , nicoProgramPointer :: NicoProgramPointer
+  , nicoLoopBeginPointerStack :: [NicoProgramPointer]-- ^ The NicoMemoryPointer is pushed to here when The NicoLoopBegin was evaluated
   }
+
+instance Show NicoMachine where
+  show (NicoMachine mem memP opP lbSt) =
+    "---"
+    ++ "\nMemory: " ++ show mem
+    ++ "\nMemory Pointer: " ++ show memP
+    ++ "\nOperation Pointer: " ++ show opP
+    ++ "\nLoop Begin Pointer Stack: " ++ show lbSt
+    ++ "\n---"
 
 
 -- | The initial state of NicoMachine
 emptyMachine :: NicoMachine
-emptyMachine = let illigalPointer = (-1)
-                   emptyStack     = stack $ \xs -> (illigalPointer, [])
-                   startPoint     = 0
-               in NicoMachine M.empty startPoint emptyStack
+emptyMachine = NicoMachine { nicoMemory         = M.empty
+                           , nicoMemoryPointer  = 0
+                           , nicoProgramPointer = 0
+                           , nicoLoopBeginPointerStack = []
+                           }
 
 
 -- | Evaluate and execute NicoLangAbstractSyntaxList with the virtual machine state
 eval :: NicoLangAbstractSyntaxList -> StateT NicoMachine IO NicoMemory
-eval [] = do
-  (NicoMachine mem _ _) <- get
-  return mem
+eval operationList = do
+  opP <- gets nicoProgramPointer
+  if operationAreFinished operationList opP
+    then gets nicoMemory
+    else do
+      let op = operationList !! opP
+      executeOperation op
+      eval operationList
+  where
+    operationAreFinished :: NicoLangAbstractSyntaxList -> NicoProgramPointer -> Bool
+    operationAreFinished xs ptr = length xs == ptr
 
-eval (NicoForward:rest) = do
-  machine@(NicoMachine mem np _) <- get
-  put machine { nicoPointer = np + 1 }
-  return mem
 
-eval (NicoBackword:rest) = do
-  machine@(NicoMachine mem np _) <- get
-  put machine { nicoPointer = np - 1 }
-  return mem
+-- Proceed the nicoProgramPointer to the next memory address
+programGoesToNext :: StateT NicoMachine IO ()
+programGoesToNext = do
+  machine@(NicoMachine _ _ opP _) <- get
+  put machine { nicoProgramPointer = opP + 1 }
 
-eval (NicoIncr:rest) = do
-  (NicoMachine mem np st) <- get
-  case M.lookup np mem of
-    Nothing  -> let newMem = M.insert np 1 mem  -- 1 is `0 (initial state) + 1 (forward)`
-                in put $ NicoMachine newMem np st
-    Just val -> let newMem = M.insert np (val + 1) mem  -- Replace val to `val + 1` on mem
-                in put $ NicoMachine newMem np st
-  return mem
+-- Get the nicoMemoryPointer pointed value in the nicoMemory
+getCurrentCell :: StateT NicoMachine IO Int
+getCurrentCell = do
+  (NicoMachine mem memP _ _) <- get
+  case M.lookup memP mem of
+    Nothing  -> return 0  -- 0 is the initial value of the cell
+    Just val -> return val
 
-eval (NicoDecr:rest) = do
-  (NicoMachine mem np st) <- get
-  case M.lookup np mem of
-    Nothing  -> let newMem = M.insert np (-1) mem  -- 1 is `0 (initial state) - 1 (backward)`
-                in put $ NicoMachine newMem np st
-    Just val -> let newMem = M.insert np (val - 1) mem  -- Replace val to `val - 1` on mem
-                in put $ NicoMachine newMem np st
-  return mem
+-- Set the value to the nicoMemoryPointer pointed nicoMemory address
+setCurrentCell :: Int -> StateT NicoMachine IO ()
+setCurrentCell val = do
+  machine@(NicoMachine mem memP _ _) <- get
+  put machine { nicoMemory = M.insert memP val mem }
 
-eval (NicoOutput:rest) = do
-  (NicoMachine mem np st) <- get
-  case M.lookup np mem of
-    Nothing  -> liftIO $ putChar $ chr 0
-    Just val -> liftIO $ putChar $ chr val
-  return mem
 
-eval (NicoInput:rest) = do
-  machine@(NicoMachine mem np st) <- get
+-- Execute a specified operation
+executeOperation :: NicoOperation -> StateT NicoMachine IO ()
+executeOperation NicoForward = do
+  --logging
+  machine <- get
+  memP    <- gets nicoMemoryPointer
+  put machine { nicoMemoryPointer = memP + 1 }
+  programGoesToNext
+  --where
+  --  logging = do
+  --    memP <- gets nicoMemoryPointer
+  --    liftIO $ putStrLn $ "Forward the nicoMemoryPointer to " ++ show (memP + 1)
+
+executeOperation NicoBackword = do
+  --logging
+  machine <- get
+  memP    <- gets nicoMemoryPointer
+  put machine { nicoMemoryPointer = memP - 1 }
+  programGoesToNext
+  --where
+  --  logging = do
+  --    memP <- gets nicoMemoryPointer
+  --    liftIO $ putStrLn $ "Backward the nicoMemoryPointer to " ++ show (memP - 1)
+
+executeOperation NicoIncr = do
+  --logging
+  machine <- get
+  cell    <- getCurrentCell
+  setCurrentCell $ cell + 1
+  programGoesToNext
+  --where
+  --  logging = do
+  --    cell <- getCurrentCell
+  --    memP <- gets nicoMemoryPointer
+  --    liftIO $ putStrLn $ "Increment (nicoMemory !! " ++ show memP ++ ") to " ++ show (cell + 1)
+
+executeOperation NicoDecr = do
+  --logging
+  machine <- get
+  cell    <- getCurrentCell
+  setCurrentCell $ cell - 1
+  programGoesToNext
+  --where
+  --  logging = do
+  --    cell <- getCurrentCell
+  --    memP <- gets nicoMemoryPointer
+  --    liftIO $ putStrLn $ "Decrement (nicoMemory !! " ++ show memP ++ ") to " ++ show (cell - 1)
+
+executeOperation NicoOutput = do
+  cell <- getCurrentCell
+  liftIO $ putChar $ chr cell
+  programGoesToNext
+
+executeOperation NicoInput = do
   val <- liftIO . fmap ord $ getChar
-  let newMem = M.insert np val mem
-  put machine { nicoMemory = newMem }
-  return newMem
+  --logging val
+  setCurrentCell val
+  programGoesToNext
+  --where
+  --  logging val = do
+  --    memP <- gets nicoMemoryPointer
+  --    liftIO $ putStrLn $ "Get " ++ show val ++ " from stdin, " ++ "and set it to (nicoMemory !! " ++ show memP ++ ")"
 
-eval (NicoLoopBegin:rest) = undefined
-eval (NicoLoopEnd:rest)   = undefined
+executeOperation NicoLoopBegin = do
+  --logging
+  machine@(NicoMachine _ _ opP lbPStack) <- get
+  put machine { nicoLoopBeginPointerStack = opP:lbPStack }
+  programGoesToNext
+  --where
+  --  logging = do
+  --    opP <- gets nicoProgramPointer
+  --    liftIO $ putStrLn $ "Push " ++ show opP ++ " to the pointer stack"
+
+executeOperation NicoLoopEnd = do
+  machine@(NicoMachine mem memP _ lbPStack) <- get
+  case lbPStack of
+    []              -> error "Cannot find the loop jump destination :("
+    (lbP:lbPStack') -> do
+      put machine { nicoLoopBeginPointerStack = lbPStack' }
+      cell <- getCurrentCell
+      if cell /= 0
+        then do
+          --loggingForLoopJump lbP
+          put machine { nicoProgramPointer = lbP }
+        else do
+          --loggingForLoopFinish lbP
+          programGoesToNext
+  --where
+  --  loggingForLoopJump   lbP = liftIO $ putStrLn $ "Pop " ++ show lbP ++ " from the pointer stack, and set it as the next program pointer"
+  --  loggingForLoopFinish lbP = liftIO $ putStrLn $ "Pop " ++ show lbP ++ " from the pointer stack, and leave from the one of loop"
