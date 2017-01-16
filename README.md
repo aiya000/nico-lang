@@ -20,3 +20,17 @@ This code puts 'HELLO'
 | `,` | あなたのハートににこにこにー！ |
 | `[` | にこにーはみんなのもの！       |
 | `]` | ｷﾓﾁﾜﾙｲ                         |
+
+
+## How to install
+
+```sh
+$ git clone https://github.com/aiya000/nico-lang
+$ cd nico-lang
+$ stack install nicorun
+
+==> nicorun and niconvert are installed to ~/.local/bin
+
+$ nicorun hello.nico
+HELLO
+```
