@@ -42,7 +42,7 @@ instance ShowT NicoOperation where
   showT NicoLoopEnd   = nicoLoopEndText
 
 -- | The whole of the nico-lang source code abstract
-type NicoLangAbstractSyntaxList = [NicoOperation]
+type NicoLangProgram = [NicoOperation]
 
 -- | The nico-lang's source code is Text
 type NicoLangSourceCode = Text

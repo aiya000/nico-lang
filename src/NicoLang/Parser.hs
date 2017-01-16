@@ -18,10 +18,10 @@ import qualified Data.Map.Lazy as M
 -- Parse nico-lang source code.
 -- If parsing is succeed, return result.
 -- Otherwise, throw the exception.
-parse :: NicoLangSourceCode -> Either String NicoLangAbstractSyntaxList
+parse :: NicoLangSourceCode -> Either String NicoLangProgram
 parse = P.parseOnly $ codeParser
 
-codeParser :: Parser NicoLangAbstractSyntaxList
+codeParser :: Parser NicoLangProgram
 codeParser = do
   nicoText <- P.many' operationParser
   --TODO: Don't use fromJust

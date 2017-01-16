@@ -71,8 +71,8 @@ runNicoState s a = flip runStateT a . runWriterT . _runNicoState $ s
 
 
 
--- | Evaluate and execute NicoLangAbstractSyntaxList with the virtual machine state
-eval :: NicoLangAbstractSyntaxList -> NicoState NicoMemory
+-- | Evaluate and execute NicoLangProgram with the virtual machine state
+eval :: NicoLangProgram -> NicoState NicoMemory
 eval operationList = do
   opP <- gets nicoProgramPointer
   if operationAreFinished operationList opP
@@ -82,7 +82,7 @@ eval operationList = do
       executeOperation op
       eval operationList
   where
-    operationAreFinished :: NicoLangAbstractSyntaxList -> NicoProgramPointer -> Bool
+    operationAreFinished :: NicoLangProgram -> NicoProgramPointer -> Bool
     operationAreFinished xs ptr = length xs == ptr
 
 

@@ -13,7 +13,7 @@ import qualified NicoLang.Parser as NicoParser
 simplySourceCode :: NicoLangSourceCode
 simplySourceCode = "笑顔届ける矢澤にこにこ！にっこにっこにーにっこにっこにーにこにーって覚えてラブニコ！にこにーって覚えてラブニコ！だめだめだめっ！あなたのハートににこにこにー！ぴょんぴょんぴょんっ！"
 
-simplySourceCodeAbstract :: NicoLangAbstractSyntaxList
+simplySourceCodeAbstract :: NicoLangProgram
 simplySourceCodeAbstract = [NicoForward, NicoIncr, NicoIncr, NicoDecr, NicoDecr, NicoBackword, NicoInput, NicoOutput]
 
 sourceCode :: NicoLangSourceCode
