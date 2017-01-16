@@ -5,14 +5,13 @@ module NicoLang.Parser
   ( parse
   ) where
 
-import Control.Applicative
+import Control.Applicative ((<|>))
 import Data.Attoparsec.Text (Parser)
 import Data.Maybe (fromJust)
 import Data.Text (Text)
 import NicoLang.Parser.Items
 import qualified Data.Attoparsec.Text as P
 import qualified Data.Map.Lazy as M
-import qualified Data.Text as T
 
 
 -- |
@@ -22,13 +21,14 @@ import qualified Data.Text as T
 parse :: NicoLangSourceCode -> Either String NicoLangAbstractSyntaxList
 parse = P.parseOnly $ codeParser
 
-
+codeParser :: Parser NicoLangAbstractSyntaxList
 codeParser = do
   nicoText <- P.many' operationParser
   --TODO: Don't use fromJust
   let nicoOp = map (fromJust . flip M.lookup operationMap) $ nicoText
   return $ nicoOp
 
+operationParser :: Parser Text
 operationParser = P.try (P.string nicoForwardText)
               <|> P.try (P.string nicoBackwordText)
               <|> P.try (P.string nicoIncrText)
