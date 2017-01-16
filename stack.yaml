@@ -4,6 +4,3 @@ flags: {}
 extra-package-dbs: []
 packages:
 - '.'
-- location:
-    git: https://github.com/aiya000/hs-stack-type
-    commit: 3244f040f1661df803a869162e4575ff7e1f344e
