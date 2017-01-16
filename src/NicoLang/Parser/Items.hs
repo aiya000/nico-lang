@@ -7,7 +7,6 @@ import Data.Map (Map)
 import Data.Text (Text)
 import NicoLang.Types (ShowT, showT)
 import qualified Data.Map.Lazy as M
-import qualified Data.Text as T
 
 -- | The nico-lang's expression of the brainf*ck's ><+-.,[]
 data NicoOperation = NicoForward    -- ^ >
