@@ -2,13 +2,10 @@
 
 module NicoLangTest.ParserTest where
 
-import Data.Monoid ((<>))
-import NicoLang.Parser
 import NicoLang.Parser.Items
 import NicoLang.Types
 import Test.Tasty
 import Test.Tasty.HUnit
-import Test.Tasty.QuickCheck
 import qualified Data.Text as T
 import qualified NicoLang.Parser as NicoParser
 
