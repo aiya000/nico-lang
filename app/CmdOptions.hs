@@ -12,6 +12,7 @@ import System.Console.CmdArgs ((&=), name, help, explicit, program, summary, arg
 
 data NicoRunOptions = NicoRunOptions
   { nicoRunTargetSourceFile :: Maybe FilePath
+  , nicoRunTransToBF        :: Bool
   , nicoRunDebug            :: Bool
   , nicoRunShowResultMemory :: Bool
   } deriving (Data, Typeable)
@@ -19,6 +20,7 @@ data NicoRunOptions = NicoRunOptions
 nicoRunOptions :: NicoRunOptions
 nicoRunOptions = NicoRunOptions
   { nicoRunTargetSourceFile = Nothing &= args
+  , nicoRunTransToBF        = False &= name "trans-bf" &= help "Don't run, compile to the brainf*ck code" &= explicit
   , nicoRunDebug            = False &= name "debug" &= help "show the trace" &= explicit
   , nicoRunShowResultMemory = False &= name "show-result-memory" &= help "show the app result" &= explicit
   }
