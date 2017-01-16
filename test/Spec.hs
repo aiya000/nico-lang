@@ -2,7 +2,7 @@
 
 import Control.Monad (forM)
 import Control.Monad.Trans.State.Lazy (runStateT)
-import Data.Bifunctor (first)
+import Data.Bifunctor (second)
 import Data.List (nub)
 import Data.Tuple.Extra ((&&&))
 import NicoLang.Evaluator (emptyMachine, eval)
@@ -31,7 +31,9 @@ getInOutTests :: IO TestTree
 getInOutTests = do
   inOutPairs  <- map inOutFiles . testNames . filter (`notElem` [".", ".."]) <$> getDirectoryContents "test/in-out"
   inOutPairs' <- sequence . map (twiceMapM readFile) $ inOutPairs
-  resultPairs <- forM inOutPairs' $ firstMapM $ \source -> do
+  -- `init` removes the line break of the tail
+  let inOutPairs'' = map (second init) inOutPairs'
+  resultPairs <- forM inOutPairs'' $ firstMapM $ \source -> do
     case parse . T.pack $ source of
       Left  e -> return . Left $ "Parse error: " ++ e
       Right a -> return . Right =<< (capture_ . flip runStateT emptyMachine $ eval a)
