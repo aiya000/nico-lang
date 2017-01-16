@@ -15,7 +15,6 @@ module NicoLang.Evaluator
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State.Class (MonadState, gets)
 import Control.Monad.State.Lazy (StateT, get, put, runStateT)
-import Control.Monad.Trans.Class (lift)
 import Control.Monad.Writer.Class (MonadWriter)
 import Control.Monad.Writer.Lazy (WriterT, tell, runWriterT)
 import Data.Char (chr, ord)
@@ -111,48 +110,52 @@ setCurrentCell val = do
 -- Execute a specified operation
 executeOperation :: NicoOperation -> NicoState ()
 executeOperation NicoForward = do
-  --logging
+  logging
   machine <- get
   memP    <- gets nicoMemoryPointer
   put machine { nicoMemoryPointer = memP + 1 }
   programGoesToNext
-  --where
-  --  logging = do
-  --    memP <- gets nicoMemoryPointer
-  --    liftIO $ putStrLn $ "Forward the nicoMemoryPointer to " ++ show (memP + 1)
+  where
+    logging :: NicoState ()
+    logging = do
+      memP <- gets nicoMemoryPointer
+      tell ["Forward the nicoMemoryPointer to " ++ show (memP + 1)]
 
 executeOperation NicoBackword = do
-  --logging
+  logging
   machine <- get
   memP    <- gets nicoMemoryPointer
   put machine { nicoMemoryPointer = memP - 1 }
   programGoesToNext
-  --where
-  --  logging = do
-  --    memP <- gets nicoMemoryPointer
-  --    liftIO $ putStrLn $ "Backward the nicoMemoryPointer to " ++ show (memP - 1)
+  where
+    logging :: NicoState ()
+    logging = do
+      memP <- gets nicoMemoryPointer
+      tell ["Backward the nicoMemoryPointer to " ++ show (memP - 1)]
 
 executeOperation NicoIncr = do
-  --logging
+  logging
   cell    <- getCurrentCell
   setCurrentCell $ cell + 1
   programGoesToNext
-  --where
-  --  logging = do
-  --    cell <- getCurrentCell
-  --    memP <- gets nicoMemoryPointer
-  --    liftIO $ putStrLn $ "Increment (nicoMemory !! " ++ show memP ++ ") to " ++ show (cell + 1)
+  where
+    logging :: NicoState ()
+    logging = do
+      cell <- getCurrentCell
+      memP <- gets nicoMemoryPointer
+      tell ["Increment (nicoMemory !! " ++ show memP ++ ") to " ++ show (cell + 1)]
 
 executeOperation NicoDecr = do
-  --logging
+  logging
   cell    <- getCurrentCell
   setCurrentCell $ cell - 1
   programGoesToNext
-  --where
-  --  logging = do
-  --    cell <- getCurrentCell
-  --    memP <- gets nicoMemoryPointer
-  --    liftIO $ putStrLn $ "Decrement (nicoMemory !! " ++ show memP ++ ") to " ++ show (cell - 1)
+  where
+    logging :: NicoState ()
+    logging = do
+      cell <- getCurrentCell
+      memP <- gets nicoMemoryPointer
+      tell ["Decrement (nicoMemory !! " ++ show memP ++ ") to " ++ show (cell - 1)]
 
 executeOperation NicoOutput = do
   cell <- getCurrentCell
@@ -161,23 +164,24 @@ executeOperation NicoOutput = do
 
 executeOperation NicoInput = do
   val <- liftIO . fmap ord $ getChar
-  --logging val
+  logging val
   setCurrentCell val
   programGoesToNext
-  --where
-  --  logging val = do
-  --    memP <- gets nicoMemoryPointer
-  --    liftIO $ putStrLn $ "Get " ++ show val ++ " from stdin, " ++ "and set it to (nicoMemory !! " ++ show memP ++ ")"
+  where
+    logging :: Int -> NicoState ()
+    logging val = do
+      memP <- gets nicoMemoryPointer
+      tell ["Get " ++ show val ++ " from stdin, " ++ "and set it to (nicoMemory !! " ++ show memP ++ ")"]
 
 executeOperation NicoLoopBegin = do
-  --logging
+  logging
   machine@(NicoMachine _ _ opP lbPStack) <- get
   put machine { nicoLoopBeginPointerStack = opP:lbPStack }
   programGoesToNext
-  --where
-  --  logging = do
-  --    opP <- gets nicoProgramPointer
-  --    liftIO $ putStrLn $ "Push " ++ show opP ++ " to the pointer stack"
+  where
+    logging = do
+      opP <- gets nicoProgramPointer
+      tell ["Push " ++ show opP ++ " to the pointer stack"]
 
 executeOperation NicoLoopEnd = do
   machine  <- get
@@ -189,11 +193,13 @@ executeOperation NicoLoopEnd = do
       cell <- getCurrentCell
       if cell /= 0
         then do
-          --loggingForLoopJump lbP
+          loggingForLoopJump lbP
           put machine { nicoProgramPointer = lbP }
         else do
-          --loggingForLoopFinish lbP
+          loggingForLoopFinish lbP
           programGoesToNext
-  --where
-  --  loggingForLoopJump   lbP = liftIO $ putStrLn $ "Pop " ++ show lbP ++ " from the pointer stack, and set it as the next program pointer"
-  --  loggingForLoopFinish lbP = liftIO $ putStrLn $ "Pop " ++ show lbP ++ " from the pointer stack, and leave from the one of loop"
+  where
+    loggingForLoopJump   :: Int -> NicoState ()
+    loggingForLoopJump   lbP = tell ["Pop " ++ show lbP ++ " from the pointer stack, and set it as the next program pointer"]
+    loggingForLoopFinish :: Int -> NicoState ()
+    loggingForLoopFinish lbP = tell ["Pop " ++ show lbP ++ " from the pointer stack, and leave from the one of loop"]
