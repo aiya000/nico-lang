@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 -- | For executing nico-lang abstract syntax list
 module NicoLang.Evaluator
   ( NicoMemory
@@ -5,11 +7,17 @@ module NicoLang.Evaluator
   , nicoProgramPointer
   , NicoMachine (NicoMachine)
   , emptyMachine
+  , NicoState
+  , runNicoState
   , eval
   ) where
 
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.State.Lazy (StateT, get, put, gets)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.State.Class (MonadState, gets)
+import Control.Monad.State.Lazy (StateT, get, put, runStateT)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Writer.Class (MonadWriter)
+import Control.Monad.Writer.Lazy (WriterT, tell, runWriterT)
 import Data.Char (chr, ord)
 import Data.IntMap.Lazy (IntMap)
 import NicoLang.Parser.Items
@@ -52,9 +60,20 @@ emptyMachine = NicoMachine { nicoMemory         = M.empty
                            , nicoLoopBeginPointerStack = []
                            }
 
+-- The state of NicoMachine with the logging
+newtype NicoState result = NicoState
+  { _runNicoState :: WriterT [String] (StateT NicoMachine IO) result
+  } deriving ( Functor, Applicative, Monad
+             , MonadWriter [String], MonadState NicoMachine, MonadIO
+             )
+
+runNicoState :: NicoState result -> NicoMachine -> IO ((result, [String]), NicoMachine)
+runNicoState s a = flip runStateT a . runWriterT . _runNicoState $ s
+
+
 
 -- | Evaluate and execute NicoLangAbstractSyntaxList with the virtual machine state
-eval :: NicoLangAbstractSyntaxList -> StateT NicoMachine IO NicoMemory
+eval :: NicoLangAbstractSyntaxList -> NicoState NicoMemory
 eval operationList = do
   opP <- gets nicoProgramPointer
   if operationAreFinished operationList opP
@@ -69,13 +88,13 @@ eval operationList = do
 
 
 -- Proceed the nicoProgramPointer to the next memory address
-programGoesToNext :: StateT NicoMachine IO ()
+programGoesToNext :: NicoState ()
 programGoesToNext = do
   machine@(NicoMachine _ _ opP _) <- get
   put machine { nicoProgramPointer = opP + 1 }
 
 -- Get the nicoMemoryPointer pointed value in the nicoMemory
-getCurrentCell :: StateT NicoMachine IO Int
+getCurrentCell :: NicoState Int
 getCurrentCell = do
   (NicoMachine mem memP _ _) <- get
   case M.lookup memP mem of
@@ -83,14 +102,14 @@ getCurrentCell = do
     Just val -> return val
 
 -- Set the value to the nicoMemoryPointer pointed nicoMemory address
-setCurrentCell :: Int -> StateT NicoMachine IO ()
+setCurrentCell :: Int -> NicoState ()
 setCurrentCell val = do
   machine@(NicoMachine mem memP _ _) <- get
   put machine { nicoMemory = M.insert memP val mem }
 
 
 -- Execute a specified operation
-executeOperation :: NicoOperation -> StateT NicoMachine IO ()
+executeOperation :: NicoOperation -> NicoState ()
 executeOperation NicoForward = do
   --logging
   machine <- get
