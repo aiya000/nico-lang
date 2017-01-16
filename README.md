@@ -1,4 +1,4 @@
-# nico-lang
+# nico-lang ![TravisCI](https://travis-ci.org/aiya000/nico-lang.svg?branch=master)
 nico-lang is the programing language of Nico Yazawa.  
 nico-lang is a dialect of Brainf\*ck :D
 
