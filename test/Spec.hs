@@ -38,9 +38,9 @@ getInOutTests = do
       Left  e -> return . Left $ "Parse error: " ++ e
       Right a -> return . Right =<< (capture_ . flip runStateT emptyMachine $ eval a)
   return $ Test.testGroup "in-out matching test" $
-    flip map (zip [1..] resultPairs) $ \case
-      (i, (Left e, _))             -> Test.testCase (show i) $ Test.assertFailure e
-      (i, (Right inData, outData)) -> Test.testCase (show i) $ inData @?= outData
+    flip map resultPairs $ \case
+      (Left e, outData)       -> Test.testCase (show outData) $ Test.assertFailure e
+      (Right inData, outData) -> Test.testCase (show outData) $ inData @?= outData
   where
     testNames :: [FilePath] -> [FilePath]
     testNames  = nub . map (takeWhile (/='.'))
