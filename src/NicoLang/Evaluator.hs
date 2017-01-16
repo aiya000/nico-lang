@@ -9,10 +9,9 @@ module NicoLang.Evaluator
   ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.State.Lazy (StateT, get, put, evalStateT, gets)
+import Control.Monad.Trans.State.Lazy (StateT, get, put, gets)
 import Data.Char (chr, ord)
 import Data.IntMap.Lazy (IntMap)
-import Data.Maybe (isNothing)
 import NicoLang.Parser.Items
 import qualified Data.IntMap.Lazy as M
 
@@ -116,7 +115,6 @@ executeOperation NicoBackword = do
 
 executeOperation NicoIncr = do
   --logging
-  machine <- get
   cell    <- getCurrentCell
   setCurrentCell $ cell + 1
   programGoesToNext
@@ -128,7 +126,6 @@ executeOperation NicoIncr = do
 
 executeOperation NicoDecr = do
   --logging
-  machine <- get
   cell    <- getCurrentCell
   setCurrentCell $ cell - 1
   programGoesToNext
@@ -164,7 +161,8 @@ executeOperation NicoLoopBegin = do
   --    liftIO $ putStrLn $ "Push " ++ show opP ++ " to the pointer stack"
 
 executeOperation NicoLoopEnd = do
-  machine@(NicoMachine mem memP _ lbPStack) <- get
+  machine  <- get
+  lbPStack <- gets nicoLoopBeginPointerStack
   case lbPStack of
     []              -> error "Cannot find the loop jump destination :("
     (lbP:lbPStack') -> do
