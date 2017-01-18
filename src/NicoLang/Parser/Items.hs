@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Define nico-lang's abstract syntax tree
+-- | Define about the types used in around the parser
 module NicoLang.Parser.Items where
 
 import Data.Map (Map)
