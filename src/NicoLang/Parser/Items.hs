@@ -44,9 +44,6 @@ instance ShowT NicoOperation where
 -- | The whole of the nico-lang source code abstract
 type NicoLangProgram = [NicoOperation]
 
--- | The nico-lang's source code is Text
-type NicoLangSourceCode = Text
-
 
 -- The mapping from an operation text to a NicoOperation
 operationMap :: Map Text NicoOperation

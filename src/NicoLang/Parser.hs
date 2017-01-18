@@ -18,7 +18,7 @@ import qualified Data.Map.Lazy as M
 -- Parse nico-lang source code.
 -- If parsing is succeed, return result.
 -- Otherwise, throw the exception.
-parse :: NicoLangSourceCode -> Either String NicoLangProgram
+parse :: Text -> Either String NicoLangProgram
 parse = P.parseOnly $ codeParser
 
 codeParser :: Parser NicoLangProgram
