@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | For generating nico-lang abstract syntax list
+-- | Parse a text to an abstract program
 module NicoLang.Parser
   ( parse
   ) where
