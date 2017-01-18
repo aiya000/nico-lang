@@ -2,7 +2,7 @@
 module Main where
 
 import CmdOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
-import Control.Monad (when, mapM_)
+import Control.Monad (mapM_)
 import NicoLang.Evaluator (emptyMachine, eval, runNicoState)
 import NicoLang.Parser (parse)
 import System.Console.CmdArgs (cmdArgs)
@@ -19,15 +19,21 @@ main = do
       nicoCode <- T.pack <$> readFile nicoFile
       case parse nicoCode of
         Left  e -> error $ "Caught the error: " ++ e
-        Right a -> do
-          if nicoRunTransToBF options
-            then mapM_ (putStr . show) a >> putStr "\n"
-            else do
-              ((mem, logs), _) <- flip runNicoState emptyMachine $ eval a
-              putStr "\n"
-              when (nicoRunDebug options) $ do
-                putStr "\n"
-                mapM_ putStrLn logs
-              when (nicoRunShowResultMemory options) $ do
-                putStr "\n"
-                print mem
+        Right a -> if nicoRunTransToBF options
+          then mapM_ (putStr . show) a >> putStrLn ""
+          else do
+            (results, _) <- flip runNicoState emptyMachine $ eval a
+            branch results options
+  where
+    branch results@(_, logs) opts | nicoRunDebug opts = do
+      putStrLn ""
+      mapM_ putStrLn logs
+      branch results (opts { nicoRunDebug = False })
+
+    branch results@(mem, _) opts | nicoRunShowResultMemory opts = do
+      putStrLn ""
+      print mem
+      branch results (opts { nicoRunShowResultMemory = False })
+
+    -- The end of branches
+    branch _ _ = return ()
