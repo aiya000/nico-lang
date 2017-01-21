@@ -7,11 +7,13 @@ module NicoLang.Parser
 
 import Control.Applicative ((<|>))
 import Data.Attoparsec.Text (Parser)
+import Data.List (foldl1')
 import Data.Maybe (fromJust)
 import Data.Text (Text)
 import NicoLang.Parser.Items
 import qualified Data.Attoparsec.Text as P
 import qualified Data.Map.Lazy as M
+import qualified Data.Text as T
 
 
 -- |
@@ -19,21 +21,28 @@ import qualified Data.Map.Lazy as M
 -- If parsing is succeed, return result.
 -- Otherwise, throw the exception.
 parse :: Text -> Either String NicoLangProgram
-parse = P.parseOnly $ codeParser
+parse = P.parseOnly codeParser
 
-codeParser :: Parser NicoLangProgram
+codeParser :: Parser [NicoOperation]
 codeParser = do
-  nicoText <- P.many' operationParser
-  --TODO: Don't use fromJust
-  let nicoOp = map (fromJust . flip M.lookup operationMap) $ nicoText
-  return $ nicoOp
+  tokens <- P.many' tokenParser
+  let mayOperations = map (fromJust . flip M.lookup operationMap) tokens
+  return mayOperations
 
-operationParser :: Parser Text
-operationParser = P.try (P.string nicoForwardText)
-              <|> P.try (P.string nicoBackwordText)
-              <|> P.try (P.string nicoIncrText)
-              <|> P.try (P.string nicoDecrText)
-              <|> P.try (P.string nicoOutputText)
-              <|> P.try (P.string nicoInputText)
-              <|> P.try (P.string nicoLoopBeginText)
-              <|> P.try (P.string nicoLoopEndText)
+tokenParser :: Parser Text
+tokenParser = nextTokenParser [ nicoForwardText
+                              , nicoBackwordText
+                              , nicoIncrText
+                              , nicoDecrText
+                              , nicoOutputText
+                              , nicoInputText
+                              , nicoLoopBeginText
+                              , nicoLoopEndText
+                              ]
+  where
+    nextTokenParser :: [Text] -> Parser Text
+    nextTokenParser tokens = do
+      let heads       = map T.head tokens
+          matchTokens = foldl1' (<|>) . map (P.try . P.string) $ tokens
+      P.skipWhile (`notElem` heads)
+      matchTokens <|> (P.anyChar >> nextTokenParser tokens)
