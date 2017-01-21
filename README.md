@@ -21,6 +21,10 @@ This code puts 'HELLO'
 | `[` | にこにーはみんなのもの！       |
 | `]` | ｷﾓﾁﾜﾙｲ                         |
 
+Perhaps you don't know Brainf\*ck ?  
+Brainf\*ck is great.  
+Please see [the Brainf\*ck spec](https://en.wikipedia.org/wiki/Brainfuck)
+
 
 ## How to install
 
