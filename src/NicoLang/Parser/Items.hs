@@ -3,7 +3,8 @@
 -- | Define about the types used in around the parser
 module NicoLang.Parser.Items where
 
-import Data.Map (Map)
+import Control.Exception.Safe (Exception, Typeable)
+import Data.Map.Lazy (Map)
 import Data.Text (Text)
 import NicoLang.Types (ShowT, showT)
 import qualified Data.Map.Lazy as M
@@ -43,6 +44,12 @@ instance ShowT NicoOperation where
 
 -- | The whole of the nico-lang source code abstract
 type NicoLangProgram = [NicoOperation]
+
+-- | An exception of nico-lang parser with its cause
+data NicoParserException = NicoParserException String
+  deriving (Show, Typeable)
+
+instance Exception NicoParserException
 
 
 -- The mapping from an operation text to a NicoOperation

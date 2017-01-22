@@ -28,6 +28,7 @@ library
                      , cmdargs
                      , containers
                      , mtl
+                     , safe-exceptions
                      , text
                      , transformers
   default-language:    Haskell2010

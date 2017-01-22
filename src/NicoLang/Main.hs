@@ -1,6 +1,7 @@
 -- | The entry point of the program
 module NicoLang.Main (defaultMain) where
 
+import Control.Exception.Safe (SomeException)
 import Control.Monad (mapM_)
 import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
 import NicoLang.Evaluator (emptyMachine, eval, runNicoState)
@@ -18,7 +19,7 @@ defaultMain = do
     Just nicoFile -> do
       nicoCode <- T.pack <$> readFile nicoFile
       case parse nicoCode of
-        Left  e -> error $ "Caught the error: " ++ e
+        Left  e -> error $ "Caught the error: " ++ show (e :: SomeException)
         Right a -> if nicoRunTransToBF options
           then mapM_ (putStr . show) a >> putStrLn ""
           else do

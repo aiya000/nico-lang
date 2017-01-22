@@ -34,7 +34,7 @@ getInOutTests = do
   let inOutPairs'' = map (second init) inOutPairs'
   resultPairs <- forM inOutPairs'' $ firstMapM $ \source -> do
     case parse . T.pack $ source of
-      Left  e -> return . Left $ "Parse error: " ++ e
+      Left  e -> return . Left $ "Parse error: " ++ show e
       Right a -> return . Right =<< (capture_ . flip runNicoState emptyMachine $ eval a)
   return $ Test.testGroup "in-out matching test" $
     flip map resultPairs $ \case
