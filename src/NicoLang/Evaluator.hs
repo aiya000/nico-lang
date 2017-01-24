@@ -70,7 +70,6 @@ runNicoState :: NicoState result -> NicoMachine -> IO ((result, [String]), NicoM
 runNicoState s a = flip runStateT a . runWriterT . _runNicoState $ s
 
 
-
 -- | Evaluate and execute NicoLangProgram with the virtual machine state
 eval :: NicoLangProgram -> NicoState NicoMemory
 eval operationList = do
