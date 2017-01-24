@@ -1,3 +1,1 @@
-- Pass tests
-- Comsume the TODO in Parser.hs
 - Add tests for cli options
