@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-
 -- | Parse a text to an abstract program
 module NicoLang.Parser
   ( parse
@@ -8,11 +7,13 @@ module NicoLang.Parser
 
 import Control.Applicative ((<|>))
 import Control.Exception.Safe (MonadCatch, throw)
-import Control.Monad (mapM)
+import Control.Monad (void, mapM)
 import Data.Attoparsec.Text (Parser)
 import Data.List (foldl1')
 import Data.Text (Text)
 import NicoLang.Parser.Items
+import qualified Control.Applicative as P (many)
+import qualified Data.Attoparsec.Combinator as P (lookAhead)
 import qualified Data.Attoparsec.Text as P
 import qualified Data.Map.Lazy as M
 import qualified Data.Text as T
@@ -34,26 +35,39 @@ parse txt =
                          "An other than token is detected in the code parser\n" ++
                          "`tokenParser` should return the tokens only"
 
+tokenTexts :: [Text]
+tokenTexts = [ nicoForwardText
+             , nicoBackwordText
+             , nicoIncrText
+             , nicoDecrText
+             , nicoOutputText
+             , nicoInputText
+             , nicoLoopBeginText
+             , nicoLoopEndText
+             ]
+
 codeParser :: Parser (Maybe [NicoOperation])
 codeParser = do
-  tokens <- P.many' tokenParser
+  tokens <- tokensParser
   let mayOperations = mapM (flip M.lookup operationMap) tokens
   return mayOperations
 
+tokensParser :: Parser [Text]
+tokensParser = do
+  blocks <- P.many tokenBlockParser
+  let tokens = concat blocks
+  return tokens
+
+tokenBlockParser :: Parser [Text]
+tokenBlockParser = do
+  skipNonToken
+  P.many tokenParser
+
 tokenParser :: Parser Text
-tokenParser = nextTokenParser [ nicoForwardText
-                              , nicoBackwordText
-                              , nicoIncrText
-                              , nicoDecrText
-                              , nicoOutputText
-                              , nicoInputText
-                              , nicoLoopBeginText
-                              , nicoLoopEndText
-                              ]
-  where
-    nextTokenParser :: [Text] -> Parser Text
-    nextTokenParser tokens = do
-      let heads       = map T.head tokens
-          matchTokens = foldl1' (<|>) . map (P.try . P.string) $ tokens
-      P.skipWhile (`notElem` heads)
-      matchTokens <|> (P.anyChar >> nextTokenParser tokens)
+tokenParser = foldl1' (<|>) . map (P.try . P.string) $ tokenTexts
+
+skipNonToken :: Parser ()
+skipNonToken = do
+  let heads = map T.head tokenTexts
+  P.skipWhile (`notElem` heads)
+  (void $ P.lookAhead tokenParser) <|> (P.anyChar >> skipNonToken)
