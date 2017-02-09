@@ -48,18 +48,11 @@ tokenTexts = [ nicoForwardText
 
 -- Parse a code to [NicoOperation]
 codeParser :: Parser (Maybe [NicoOperation])
-codeParser = do
-  --TODO: I think this procedure can be written oneline
-  tokens <- tokensParser
-  let mayOperations = mapM fromToken tokens
-  return mayOperations
+codeParser = mapM fromToken <$> tokensParser
 
 -- Parse a code to tokens
 tokensParser :: Parser [Text]
-tokensParser = do
-  blocks <- P.many tokenBlockParser
-  let tokens = concat blocks
-  return tokens
+tokensParser = concat <$> P.many tokenBlockParser
 
 -- A block means "あああ にっこにっこにーにこにーって覚えてラブニコ！ いいい" .
 --                       |^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
