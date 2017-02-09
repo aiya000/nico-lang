@@ -26,8 +26,8 @@ import qualified Data.Text as T
 parse :: MonadCatch m => Text -> m NicoLangProgram
 parse txt =
   case P.parseOnly codeParser txt of
-    Left  e        -> throw $ NicoParserException e
-    Right Nothing  -> throw $ NicoParserException tokenParseErrorMsg
+    Left  e        -> throw $ BrainfuckParserException e
+    Right Nothing  -> throw $ BrainfuckParserException tokenParseErrorMsg
     Right (Just a) -> return a
   where
     -- Throw this message if any looking up a token is failure

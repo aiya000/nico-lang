@@ -21,6 +21,13 @@ class BrainfuckOperation a where
   loopEnd   :: a
   fromToken :: Text -> Maybe a  -- ^ Convert text to BrainfuckOperation, but return Nothing if the text isn't token
 
+-- | An exception of brainf*ck instance's parser with the cause
+data BrainfuckParserException = BrainfuckParserException String
+  deriving (Show, Typeable)
+
+instance Exception BrainfuckParserException
+
+
 -- | The nico-lang's expression of the brainf*ck's ><+-.,[]
 data NicoOperation = NicoForward    -- ^ >
                    | NicoBackword   -- ^ <
@@ -76,12 +83,6 @@ instance ShowT NicoOperation where
 
 -- | The whole of the nico-lang source code abstract
 type NicoLangProgram = [NicoOperation]
-
--- | An exception of nico-lang parser with its cause
-data NicoParserException = NicoParserException String
-  deriving (Show, Typeable)
-
-instance Exception NicoParserException
 
 
 
