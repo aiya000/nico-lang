@@ -23,7 +23,7 @@ import qualified Data.Text as T
 -- Parse nico-lang source code.
 -- If parsing is succeed, return result.
 -- Otherwise, throw the exception.
-parse :: MonadCatch m => Text -> m NicoLangProgram
+parse :: (MonadCatch m, BrainfuckOperation a) => Text -> m (BrainfuckProgram a)
 parse txt =
   case P.parseOnly codeParser txt of
     Left  e        -> throw $ BrainfuckParserException e
@@ -46,8 +46,8 @@ tokenTexts = [ nicoForwardText
              , nicoLoopEndText
              ]
 
--- Parse a code to [NicoOperation]
-codeParser :: Parser (Maybe [NicoOperation])
+-- Parse a code to brainf*ck operations
+codeParser :: BrainfuckOperation a => Parser (Maybe [a])
 codeParser = mapM fromToken <$> tokensParser
 
 -- Parse a code to tokens
