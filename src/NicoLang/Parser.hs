@@ -49,8 +49,9 @@ tokenTexts = [ nicoForwardText
 -- Parse a code to [NicoOperation]
 codeParser :: Parser (Maybe [NicoOperation])
 codeParser = do
+  --TODO: I think this procedure can be written oneline
   tokens <- tokensParser
-  let mayOperations = mapM (flip M.lookup operationMap) tokens
+  let mayOperations = mapM fromToken tokens
   return mayOperations
 
 -- Parse a code to tokens

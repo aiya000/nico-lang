@@ -9,6 +9,18 @@ import Data.Text (Text)
 import NicoLang.Types (ShowT, showT)
 import qualified Data.Map.Lazy as M
 
+-- | The expression of the brainf*ck's ><+-.,[]
+class BrainfuckOperation a where
+  forward   :: a
+  backword  :: a
+  incr      :: a
+  decr      :: a
+  output    :: a
+  input     :: a
+  loopBegin :: a
+  loopEnd   :: a
+  fromToken :: Text -> Maybe a  -- ^ Convert text to BrainfuckOperation, but return Nothing if the text isn't token
+
 -- | The nico-lang's expression of the brainf*ck's ><+-.,[]
 data NicoOperation = NicoForward    -- ^ >
                    | NicoBackword   -- ^ <
@@ -19,6 +31,26 @@ data NicoOperation = NicoForward    -- ^ >
                    | NicoLoopBegin  -- ^ [
                    | NicoLoopEnd    -- ^ ]
   deriving (Eq)
+
+instance BrainfuckOperation NicoOperation where
+  forward   = NicoForward
+  backword  = NicoBackword
+  incr      = NicoIncr
+  decr      = NicoDecr
+  output    = NicoOutput
+  input     = NicoInput
+  loopBegin = NicoLoopBegin
+  loopEnd   = NicoLoopEnd
+  fromToken = flip M.lookup $ M.fromList [ (nicoForwardText   , NicoForward)
+                                         , (nicoBackwordText  , NicoBackword)
+                                         , (nicoIncrText      , NicoIncr)
+                                         , (nicoDecrText      , NicoDecr)
+                                         , (nicoOutputText    , NicoOutput)
+                                         , (nicoInputText     , NicoInput)
+                                         , (nicoLoopBeginText , NicoLoopBegin)
+                                         , (nicoLoopEndText   , NicoLoopEnd)
+                                         ]
+
 
 -- | Convert to the brainf*ck code for the debug
 instance Show NicoOperation where
@@ -52,17 +84,6 @@ data NicoParserException = NicoParserException String
 instance Exception NicoParserException
 
 
--- The mapping from an operation text to a NicoOperation
-operationMap :: Map Text NicoOperation
-operationMap = M.fromList [ (nicoForwardText   , NicoForward)
-                          , (nicoBackwordText  , NicoBackword)
-                          , (nicoIncrText      , NicoIncr)
-                          , (nicoDecrText      , NicoDecr)
-                          , (nicoOutputText    , NicoOutput)
-                          , (nicoInputText     , NicoInput)
-                          , (nicoLoopBeginText , NicoLoopBegin)
-                          , (nicoLoopEndText   , NicoLoopEnd)
-                          ]
 
 -- | This text means the forward of nico-lang syntax
 nicoForwardText :: Text
