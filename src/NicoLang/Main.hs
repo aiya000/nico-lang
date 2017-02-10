@@ -6,6 +6,7 @@ import Control.Monad (mapM_)
 import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
 import NicoLang.Evaluator (emptyMachine, eval, runBrainState)
 import NicoLang.Parser (parse)
+import NicoLang.Parser.Items (NicoLangProgram)
 import System.Console.CmdArgs (cmdArgs)
 import qualified Data.Text as T
 
@@ -18,8 +19,8 @@ defaultMain = do
     Nothing       -> error "Please specify the source code"
     Just nicoFile -> do
       nicoCode <- T.pack <$> readFile nicoFile
-      case parse nicoCode of
-        Left  e -> error $ "Caught the error: " ++ show (e :: SomeException)
+      case (parse nicoCode :: Either SomeException NicoLangProgram) of
+        Left  e -> error $ "Caught the error: " ++ show e
         Right a -> if nicoRunTransToBF options
           then mapM_ (putStr . show) a >> putStrLn ""
           else do

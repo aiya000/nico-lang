@@ -1,11 +1,13 @@
 {-# LANGUAGE LambdaCase #-}
 
+import Control.Exception.Safe (SomeException)
 import Control.Monad (forM)
 import Data.Bifunctor (second)
 import Data.List (nub)
 import Data.Tuple.Extra ((&&&))
 import NicoLang.Evaluator (emptyMachine, eval, runBrainState)
 import NicoLang.Parser (parse)
+import NicoLang.Parser.Items (NicoLangProgram)
 import System.EasyFile (getDirectoryContents)
 import System.IO.Silently (capture_)
 import Test.Tasty (TestTree)
@@ -33,7 +35,7 @@ getInOutTests = do
   -- `init` removes the line break of the tail
   let inOutPairs'' = map (second init) inOutPairs'
   resultPairs <- forM inOutPairs'' $ firstMapM $ \source -> do
-    case parse . T.pack $ source of
+    case (parse . T.pack $ source :: Either SomeException NicoLangProgram) of
       Left  e -> return . Left $ "Parse error: " ++ show e
       Right a -> return . Right =<< (capture_ . flip runBrainState emptyMachine $ eval a)
   return $ Test.testGroup "in-out matching test" $

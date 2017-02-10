@@ -70,7 +70,7 @@ runBrainState s a = flip runStateT a . runWriterT . _runBrainState $ s
 
 
 -- | Evaluate and execute NicoLangProgram with the virtual machine state
-eval :: NicoLangProgram -> BrainState VMMemory
+eval :: (Eq a, BrainfuckOperation a) => BrainfuckProgram a -> BrainState VMMemory
 eval operationList = do
   opP <- gets bfProgramPointer
   if operationAreFinished operationList opP
@@ -80,7 +80,7 @@ eval operationList = do
       executeOperation op
       eval operationList
   where
-    operationAreFinished :: NicoLangProgram -> BFProgramPointer -> Bool
+    operationAreFinished :: BrainfuckProgram a -> BFProgramPointer -> Bool
     operationAreFinished xs ptr = length xs == ptr
 
 
@@ -106,8 +106,8 @@ setCurrentCell val = do
 
 
 -- Execute a specified operation
-executeOperation :: NicoOperation -> BrainState ()
-executeOperation NicoForward = do
+executeOperation :: (Eq a, BrainfuckOperation a) => a -> BrainState ()
+executeOperation x | x == forward = do
   logging
   machine <- get
   memP    <- gets vmMemoryPointer
@@ -119,7 +119,7 @@ executeOperation NicoForward = do
       memP <- gets vmMemoryPointer
       tell ["Forward the vmMemoryPointer to " ++ show (memP + 1)]
 
-executeOperation NicoBackword = do
+executeOperation x | x == backword = do
   logging
   machine <- get
   memP    <- gets vmMemoryPointer
@@ -131,7 +131,7 @@ executeOperation NicoBackword = do
       memP <- gets vmMemoryPointer
       tell ["Backward the vmMemoryPointer to " ++ show (memP - 1)]
 
-executeOperation NicoIncr = do
+executeOperation x | x == incr = do
   logging
   cell    <- getCurrentCell
   setCurrentCell $ cell + 1
@@ -143,7 +143,7 @@ executeOperation NicoIncr = do
       memP <- gets vmMemoryPointer
       tell ["Increment (vmMemory !! " ++ show memP ++ ") to " ++ show (cell + 1)]
 
-executeOperation NicoDecr = do
+executeOperation x | x == decr = do
   logging
   cell    <- getCurrentCell
   setCurrentCell $ cell - 1
@@ -155,12 +155,12 @@ executeOperation NicoDecr = do
       memP <- gets vmMemoryPointer
       tell ["Decrement (vmMemory !! " ++ show memP ++ ") to " ++ show (cell - 1)]
 
-executeOperation NicoOutput = do
+executeOperation x | x == output = do
   cell <- getCurrentCell
   liftIO $ putChar $ chr cell
   programGoesToNext
 
-executeOperation NicoInput = do
+executeOperation x | x == input = do
   val <- liftIO . fmap ord $ getChar
   logging val
   setCurrentCell val
@@ -171,7 +171,7 @@ executeOperation NicoInput = do
       memP <- gets vmMemoryPointer
       tell ["Get " ++ show val ++ " from stdin, " ++ "and set it to (vmMemory !! " ++ show memP ++ ")"]
 
-executeOperation NicoLoopBegin = do
+executeOperation x | x == loopBegin = do
   logging
   machine@(BFVirtualMachine _ _ opP lbPStack) <- get
   put machine { loopBeginPointerStack = opP:lbPStack }
@@ -181,7 +181,7 @@ executeOperation NicoLoopBegin = do
       opP <- gets bfProgramPointer
       tell ["Push " ++ show opP ++ " to the pointer stack"]
 
-executeOperation NicoLoopEnd = do
+executeOperation x | x == loopEnd = do
   machine  <- get
   lbPStack <- gets loopBeginPointerStack
   case lbPStack of
