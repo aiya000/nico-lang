@@ -11,6 +11,7 @@ import qualified Data.Map.Lazy as M
 
 -- | The expression of the brainf*ck's ><+-.,[]
 class BrainfuckOperation a where
+  --TODO: Rename forward, backword, incr, decr, output, input, loopBegin, loopEnd to special name
   forward   :: a
   backword  :: a
   incr      :: a
