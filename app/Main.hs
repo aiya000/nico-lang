@@ -1,6 +1,41 @@
+-- | The entry point of the program
 module Main where
 
-import NicoLang.Main (defaultMain)
+import Control.Exception.Safe (SomeException)
+import Control.Monad (mapM_)
+import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
+import Brainhack.Evaluator (emptyMachine, eval, runBrainState)
+import Brainhack.Parser (parse)
+import NicoLang.Parser.Items (NicoLangProgram)
+import System.Console.CmdArgs (cmdArgs)
+import qualified Data.Text as T
 
+
+-- | The entry point of the program
 main :: IO ()
-main = defaultMain
+main = do
+  options <- cmdArgs nicoRunOptions
+  case nicoRunTargetSourceFile options of
+    Nothing       -> error "Please specify the source code"
+    Just nicoFile -> do
+      nicoCode <- T.pack <$> readFile nicoFile
+      case (parse nicoCode :: Either SomeException NicoLangProgram) of
+        Left  e -> error $ "Caught the error: " ++ show e
+        Right a -> if nicoRunTransToBF options
+          then mapM_ (putStr . show) a >> putStrLn ""
+          else do
+            (results, _) <- flip runBrainState emptyMachine $ eval a
+            executeOptions results options
+  where
+    executeOptions results@(_, logs) opts | nicoRunDebug opts = do
+      putStrLn ""
+      mapM_ putStrLn logs
+      executeOptions results (opts { nicoRunDebug = False })
+
+    executeOptions results@(mem, _) opts | nicoRunShowResultMemory opts = do
+      putStrLn ""
+      print mem
+      executeOptions results (opts { nicoRunShowResultMemory = False })
+
+    -- The end of branches
+    executeOptions _ _ = return ()

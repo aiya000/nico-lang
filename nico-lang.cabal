@@ -2,7 +2,7 @@ name:                nico-lang
 version:             0.1.0.0
 synopsis:            Nico-lang is the programing language of Nico Yazawa
 description:         Please see README.md
-homepage:            https://github.com/aiya000/nico-lang#readme
+homepage:            https://github.com/aiya000/nico-lang
 license:             MIT
 license-file:        LICENSE
 author:              aiya000
@@ -16,15 +16,25 @@ extra-source-files:  README.md
 executable nicorun
   hs-source-dirs:      app
   main-is:             Main.hs
+  other-modules:       NicoLang.CliOptions
   default-language:    Haskell2010
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:       base >= 4.7 && < 5
+                     , attoparsec
+                     , brainhack
+                     , cmdargs
+                     , containers
+                     , mtl
                      , nico-lang
+                     , safe-exceptions
+                     , text
+                     , transformers
 
 library
   hs-source-dirs:      src
   build-depends:       base >= 4.7 && < 5
                      , attoparsec
+                     , brainhack
                      , cmdargs
                      , containers
                      , mtl
@@ -32,11 +42,7 @@ library
                      , text
                      , transformers
   default-language:    Haskell2010
-  exposed-modules:     NicoLang.Parser
-                     , NicoLang.CliOptions
-                     , NicoLang.Evaluator
-                     , NicoLang.Main
-                     , NicoLang.Parser.Items
+  exposed-modules:     NicoLang.Parser.Items
                      , NicoLang.Types
 
 executable niconvert
@@ -54,6 +60,7 @@ test-suite nico-test
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   other-modules:       NicoLangTest.ParserTest
   build-depends:       base
+                     , brainhack
                      , easy-file
                      , extra
                      , nico-lang

@@ -8,8 +8,8 @@ import NicoLang.Parser.Items
 import NicoLang.Types
 import Test.Tasty
 import Test.Tasty.HUnit
+import qualified Brainhack.Parser as Parser
 import qualified Data.Text as T
-import qualified NicoLang.Parser as NicoParser
 
 
 simplySourceCode :: Text
@@ -26,11 +26,11 @@ test :: TestTree
 test =
   testGroup "Parser test"
     [ testCase "Parse from source code text to nico-lang abstract" $
-        case (NicoParser.parse simplySourceCode :: Either SomeException NicoLangProgram) of
+        case (Parser.parse simplySourceCode :: Either SomeException NicoLangProgram) of
           Left _  -> assertFailure "Parsing is fail"
           Right x -> x @?= simplySourceCodeAbstract
     , testCase "Parse result can be restored by ShowT" $
-        case (NicoParser.parse sourceCode :: Either SomeException NicoLangProgram) of
+        case (Parser.parse sourceCode :: Either SomeException NicoLangProgram) of
           Left _  -> assertFailure "Parsing is fail"
           Right x -> (T.concat . map showT $ x) @?= sourceCode
     ]

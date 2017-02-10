@@ -1,12 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
 
+import Brainhack.Evaluator (emptyMachine, eval, runBrainState)
+import Brainhack.Parser (parse)
 import Control.Exception.Safe (SomeException)
 import Control.Monad (forM)
 import Data.Bifunctor (second)
 import Data.List (nub)
 import Data.Tuple.Extra ((&&&))
-import NicoLang.Evaluator (emptyMachine, eval, runBrainState)
-import NicoLang.Parser (parse)
 import NicoLang.Parser.Items (NicoLangProgram)
 import System.EasyFile (getDirectoryContents)
 import System.IO.Silently (capture_)
