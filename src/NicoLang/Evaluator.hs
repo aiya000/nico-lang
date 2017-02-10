@@ -4,7 +4,6 @@
 module NicoLang.Evaluator
   ( NicoMemory
   , NicoMemoryPointer
-  , nicoProgramPointer
   , NicoMachine (NicoMachine)
   , emptyMachine
   , NicoState
