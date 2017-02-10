@@ -19,6 +19,7 @@ class BrainfuckOperation a where
   input     :: a
   loopBegin :: a
   loopEnd   :: a
+  toToken   :: a -> Text  -- ^ Convert BrainfuckOperation to token text
   fromToken :: Text -> Maybe a  -- ^ Convert text to BrainfuckOperation, but return Nothing if the text isn't token
 
 -- | The whole of the brainf*ck source code abstract
@@ -51,6 +52,7 @@ instance BrainfuckOperation NicoOperation where
   input     = NicoInput
   loopBegin = NicoLoopBegin
   loopEnd   = NicoLoopEnd
+  toToken   = showT
   fromToken = flip M.lookup $ M.fromList [ (nicoForwardText   , NicoForward)
                                          , (nicoBackwordText  , NicoBackword)
                                          , (nicoIncrText      , NicoIncr)

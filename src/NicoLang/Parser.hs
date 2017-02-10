@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Parse a text to an abstract program
 module NicoLang.Parser
@@ -23,7 +24,7 @@ import qualified Data.Text as T
 -- Parse nico-lang source code.
 -- If parsing is succeed, return result.
 -- Otherwise, throw the exception.
-parse :: (MonadCatch m, BrainfuckOperation a) => Text -> m (BrainfuckProgram a)
+parse :: forall m a. (MonadCatch m, BrainfuckOperation a) => Text -> m (BrainfuckProgram a)
 parse txt =
   case P.parseOnly codeParser txt of
     Left  e        -> throw $ BrainfuckParserException e
@@ -35,41 +36,42 @@ parse txt =
                          "An other than token is detected in the code parser\n" ++
                          "`tokenParser` should return the tokens only"
 
-tokenTexts :: [Text]
-tokenTexts = [ nicoForwardText
-             , nicoBackwordText
-             , nicoIncrText
-             , nicoDecrText
-             , nicoOutputText
-             , nicoInputText
-             , nicoLoopBeginText
-             , nicoLoopEndText
-             ]
+    -- Determine monomorphic type of BrainfuckProgram and its tokens
+    tokenTexts :: [Text]
+    tokenTexts = map toToken ([ forward
+                              , backword
+                              , incr
+                              , decr
+                              , output
+                              , input
+                              , loopBegin
+                              , loopEnd
+                              ] :: [a])
 
--- Parse a code to brainf*ck operations
-codeParser :: BrainfuckOperation a => Parser (Maybe [a])
-codeParser = mapM fromToken <$> tokensParser
+    -- Parse a code to brainf*ck operations
+    codeParser :: Parser (Maybe [a])
+    codeParser = mapM fromToken <$> tokensParser
 
--- Parse a code to tokens
-tokensParser :: Parser [Text]
-tokensParser = concat <$> P.many tokenBlockParser
+    -- Parse a code to tokens
+    tokensParser :: Parser [Text]
+    tokensParser = concat <$> P.many tokenBlockParser
 
--- A block means "あああ にっこにっこにーにこにーって覚えてラブニコ！ いいい" .
---                       |^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
--- And parse its text to [にっこにっこにー, にこにーって覚えてラブニコ！]
-tokenBlockParser :: Parser [Text]
-tokenBlockParser = do
-  skipNonToken
-  P.many tokenParser
+    -- A block means "あああ にっこにっこにーにこにーって覚えてラブニコ！ いいい" .
+    --                       |^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|
+    -- And parse its text to [にっこにっこにー, にこにーって覚えてラブニコ！]
+    tokenBlockParser :: Parser [Text]
+    tokenBlockParser = do
+      skipNonToken
+      P.many tokenParser
 
--- Match any token
-tokenParser :: Parser Text
-tokenParser = foldl1' (<|>) . map (P.try . P.string) $ tokenTexts
+    -- Match any token
+    tokenParser :: Parser Text
+    tokenParser = foldl1' (<|>) . map (P.try . P.string) $ tokenTexts
 
--- Skip other than the token
--- (Seek to just before the token)
-skipNonToken :: Parser ()
-skipNonToken = do
-  let heads = map T.head tokenTexts
-  P.skipWhile (`notElem` heads)
-  (void $ P.lookAhead tokenParser) <|> (P.anyChar >> skipNonToken)
+    -- Skip other than the token
+    -- (Seek to just before the token)
+    skipNonToken :: Parser ()
+    skipNonToken = do
+      let heads = map T.head tokenTexts
+      P.skipWhile (`notElem` heads)
+      (void $ P.lookAhead tokenParser) <|> (P.anyChar >> skipNonToken)
