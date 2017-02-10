@@ -57,6 +57,7 @@ test-suite nico-test
                      , easy-file
                      , extra
                      , nico-lang
+                     , safe-exceptions
                      , silently
                      , tasty
                      , tasty-hunit
