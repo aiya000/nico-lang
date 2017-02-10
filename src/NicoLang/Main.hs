@@ -4,7 +4,7 @@ module NicoLang.Main (defaultMain) where
 import Control.Exception.Safe (SomeException)
 import Control.Monad (mapM_)
 import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
-import NicoLang.Evaluator (emptyMachine, eval, runNicoState)
+import NicoLang.Evaluator (emptyMachine, eval, runBrainState)
 import NicoLang.Parser (parse)
 import System.Console.CmdArgs (cmdArgs)
 import qualified Data.Text as T
@@ -23,7 +23,7 @@ defaultMain = do
         Right a -> if nicoRunTransToBF options
           then mapM_ (putStr . show) a >> putStrLn ""
           else do
-            (results, _) <- flip runNicoState emptyMachine $ eval a
+            (results, _) <- flip runBrainState emptyMachine $ eval a
             executeOptions results options
   where
     executeOptions results@(_, logs) opts | nicoRunDebug opts = do

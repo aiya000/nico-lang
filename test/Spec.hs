@@ -4,7 +4,7 @@ import Control.Monad (forM)
 import Data.Bifunctor (second)
 import Data.List (nub)
 import Data.Tuple.Extra ((&&&))
-import NicoLang.Evaluator (emptyMachine, eval, runNicoState)
+import NicoLang.Evaluator (emptyMachine, eval, runBrainState)
 import NicoLang.Parser (parse)
 import System.EasyFile (getDirectoryContents)
 import System.IO.Silently (capture_)
@@ -35,7 +35,7 @@ getInOutTests = do
   resultPairs <- forM inOutPairs'' $ firstMapM $ \source -> do
     case parse . T.pack $ source of
       Left  e -> return . Left $ "Parse error: " ++ show e
-      Right a -> return . Right =<< (capture_ . flip runNicoState emptyMachine $ eval a)
+      Right a -> return . Right =<< (capture_ . flip runBrainState emptyMachine $ eval a)
   return $ Test.testGroup "in-out matching test" $
     flip map resultPairs $ \case
       (Left e, outData)       -> Test.testCase (show outData) $ Test.assertFailure e
