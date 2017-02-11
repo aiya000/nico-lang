@@ -3,9 +3,7 @@
 -- | Define about the types used in around the parser
 module NicoLang.Parser.Items where
 
-import Brainhack.Parser.Items (BrainfuckOperation (..), BrainfuckProgram, BrainfuckParserException (..))
-import Control.Exception.Safe (Exception, Typeable)
-import Data.Map.Lazy (Map)
+import Brainhack.Parser.Items (BrainfuckOperation (..), BrainfuckProgram)
 import Data.Text (Text)
 import NicoLang.Types (ShowT, showT)
 import qualified Data.Map.Lazy as M
