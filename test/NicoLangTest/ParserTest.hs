@@ -4,13 +4,10 @@ module NicoLangTest.ParserTest where
 
 import Brainhack.Parser.Items (BrainfuckOperator (..))
 import Control.Exception.Safe (SomeException)
-import Data.Text (Text)
-import NicoLang.Parser.Items
 import NicoLang.Parser.Items (NicoToken)
 import Test.Tasty
 import Test.Tasty.HUnit
 import qualified Brainhack.Parser as Parser
-import qualified Data.Text as T
 
 
 simplySourceCode :: NicoToken
@@ -28,6 +25,6 @@ test =
   testGroup "Parser test"
     [ testCase "Parse from source code text to nico-lang abstract" $
         case Parser.parse simplySourceCode of
-          Left  _ -> assertFailure "Parsing is fail"
+          Left  e -> assertFailure $ "Parsing is fail" ++ show (e :: SomeException)
           Right x -> x @?= simplySourceCodeAbstract
     ]

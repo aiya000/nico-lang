@@ -7,7 +7,7 @@ import Control.Monad (forM)
 import Data.Bifunctor (second)
 import Data.List (nub)
 import Data.Tuple.Extra ((&&&))
-import NicoLang.Parser.Items (NicoLangProgram)
+import NicoLang.Parser.Items (NicoToken(NicoToken))
 import System.EasyFile (getDirectoryContents)
 import System.IO.Silently (capture_)
 import Test.Tasty (TestTree)
@@ -35,8 +35,8 @@ getInOutTests = do
   -- `init` removes the line break of the tail
   let inOutPairs'' = map (second init) inOutPairs'
   resultPairs <- forM inOutPairs'' $ firstMapM $ \source -> do
-    case (parse . T.pack $ source :: Either SomeException NicoLangProgram) of
-      Left  e -> return . Left $ "Parse error: " ++ show e
+    case parse . NicoToken . T.pack $ source of
+      Left  e -> return . Left $ "Parse error: " ++ show (e :: SomeException)
       Right a -> return . Right =<< (capture_ . flip runBrainState emptyMachine $ eval a)
   return $ Test.testGroup "in-out matching test" $
     flip map resultPairs $ \case
