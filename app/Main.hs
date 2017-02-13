@@ -1,13 +1,15 @@
 -- | The entry point of the program
 module Main where
 
-import Control.Exception.Safe (SomeException)
-import Control.Monad (mapM_)
-import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
 import Brainhack.Evaluator (emptyMachine, eval, runBrainState)
 import Brainhack.Parser (parse)
-import NicoLang.Parser.Items (NicoLangProgram)
+import Control.Exception.Safe (SomeException)
+import Control.Monad (mapM_)
+import Data.Text (Text)
+import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
+import NicoLang.Parser.Items (NicoToken (NicoToken))
 import System.Console.CmdArgs (cmdArgs)
+import qualified Brainhack.Parser.Items as B
 import qualified Data.Text as T
 
 
@@ -18,9 +20,9 @@ main = do
   case nicoRunTargetSourceFile options of
     Nothing       -> error "Please specify the source code"
     Just nicoFile -> do
-      nicoCode <- T.pack <$> readFile nicoFile
-      case (parse nicoCode :: Either SomeException NicoLangProgram) of
-        Left  e -> error $ "Caught the error: " ++ show e
+      nicoCode <- NicoToken . T.pack <$> readFile nicoFile
+      case parse nicoCode of
+        Left  e -> error $ "Caught the error: " ++ show (e :: SomeException)
         Right a -> if nicoRunTransToBF options
           then mapM_ (putStr . show) a >> putStrLn ""
           else do

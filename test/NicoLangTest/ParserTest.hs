@@ -5,7 +5,6 @@ module NicoLangTest.ParserTest where
 import Control.Exception.Safe (SomeException)
 import Data.Text (Text)
 import NicoLang.Parser.Items
-import NicoLang.Types
 import Test.Tasty
 import Test.Tasty.HUnit
 import qualified Brainhack.Parser as Parser

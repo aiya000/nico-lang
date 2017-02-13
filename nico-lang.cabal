@@ -43,7 +43,6 @@ library
                      , transformers
   default-language:    Haskell2010
   exposed-modules:     NicoLang.Parser.Items
-                     , NicoLang.Types
 
 executable niconvert
   hs-source-dirs:      .
