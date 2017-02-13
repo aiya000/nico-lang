@@ -4,11 +4,10 @@
 -- | Define about the types used in around the parser
 module NicoLang.Parser.Items where
 
-import Brainhack.Parser.Items (BrainfuckToken (..), BrainfuckProgram, BrainfuckOperator (..))
+import Brainhack.Parser.Items (BrainfuckToken (..), BrainfuckOperator (..))
 import Data.List (lookup)
 import Data.String (IsString)
 import Data.Text (Text)
-import qualified Data.Map.Lazy as M
 import qualified Data.Text as T
 
 newtype NicoToken = NicoToken { unNicoToken :: Text }

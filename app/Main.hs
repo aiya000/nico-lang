@@ -5,11 +5,9 @@ import Brainhack.Evaluator (emptyMachine, eval, runBrainState)
 import Brainhack.Parser (parse)
 import Control.Exception.Safe (SomeException)
 import Control.Monad (mapM_)
-import Data.Text (Text)
 import NicoLang.CliOptions (NicoRunOptions(nicoRunTargetSourceFile, nicoRunTransToBF, nicoRunDebug, nicoRunShowResultMemory), nicoRunOptions)
 import NicoLang.Parser.Items (NicoToken (NicoToken))
 import System.Console.CmdArgs (cmdArgs)
-import qualified Brainhack.Parser.Items as B
 import qualified Data.Text as T
 
 
