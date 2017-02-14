@@ -4,7 +4,6 @@ flags: {}
 extra-package-dbs: []
 packages:
 - '.'
-- location: '../brainhack'
-#- location:
-#    git: https://github.com/aiya000/brainhack.git
-#    commit: 981bec38bc646713c888b18ce2bf0fcb6d5a7d74
+- location:
+    git: https://github.com/aiya000/brainhack.git
+    commit: b4b260a22c597e750e2587df2ce641638606a347
