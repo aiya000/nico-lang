@@ -67,6 +67,4 @@ test-suite nico-test
                      , silently
                      , tasty
                      , tasty-hunit
-                     , tasty-quickcheck
                      , text
-                     , transformers
